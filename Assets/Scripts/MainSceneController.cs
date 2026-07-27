@@ -12,8 +12,7 @@ public class MainSceneController : MonoBehaviour
     {
         if (levelButton != null)
         {
-            levelButton.onClick.AddListener(
-                OpenCurrentLevel);
+            levelButton.onClick.AddListener(OpenCurrentLevel);
         }
     }
 
@@ -26,8 +25,7 @@ public class MainSceneController : MonoBehaviour
     {
         if (levelButton != null)
         {
-            levelButton.onClick.RemoveListener(
-                OpenCurrentLevel);
+            levelButton.onClick.RemoveListener(OpenCurrentLevel);
         }
     }
 
@@ -46,8 +44,7 @@ public class MainSceneController : MonoBehaviour
 
         if (levelButton != null)
         {
-            levelButton.interactable =
-                !finished;
+            levelButton.interactable = !finished;
         }
     }
 
@@ -58,7 +55,6 @@ public class MainSceneController : MonoBehaviour
             return;
         }
 
-        SceneManager.LoadScene(
-            SceneNames.Level);
+        SceneManager.LoadScene(SceneNames.Level);
     }
 }
