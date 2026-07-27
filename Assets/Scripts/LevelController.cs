@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-[RequireComponent(typeof(GridItemFactory))]
+[RequireComponent(
+    typeof(GridItemFactory),
+    typeof(SpecialExplosionController))]
 public class LevelController : MonoBehaviour
 {
     [SerializeField] private float cellSize = 1f;
@@ -16,6 +18,8 @@ public class LevelController : MonoBehaviour
     private Board _board;
     private GridItemFactory _itemFactory;
     private Camera _mainCamera;
+    private SpecialExplosionController
+    _specialExplosionController;
 
     private int _remainingMoves;
     private bool _isResolving;
@@ -33,6 +37,9 @@ public class LevelController : MonoBehaviour
     {
         _itemFactory =
             GetComponent<GridItemFactory>();
+
+        _specialExplosionController =
+            GetComponent<SpecialExplosionController>();
 
         _mainCamera = Camera.main;
     }
@@ -56,6 +63,9 @@ public class LevelController : MonoBehaviour
             data.Width,
             data.Height,
             cellSize);
+
+        _specialExplosionController.Initialize(
+            _board);
 
         BuildGrid(data);
         FitCameraToGrid(data);
@@ -116,7 +126,7 @@ public class LevelController : MonoBehaviour
     }
 
     private void HandlePointerDown(
-        Vector2 screenPosition)
+    Vector2 screenPosition)
     {
         if (_mainCamera == null)
         {
@@ -141,28 +151,37 @@ public class LevelController : MonoBehaviour
         GridItem tappedItem =
             _board.GetItem(row, column);
 
-        if (!(tappedItem is Cube tappedCube))
+        if (tappedItem is Cube tappedCube)
         {
+            List<Cube> group =
+                CubeGroupFinder.FindGroup(
+                    _board,
+                    tappedCube);
+
+            if (group.Count < 2)
+            {
+                Debug.Log(
+                    $"Invalid tap: only {group.Count} cube.");
+
+                return;
+            }
+
+            StartCoroutine(
+                ResolveCubeBlast(
+                    tappedCube,
+                    group));
+
             return;
         }
 
-        List<Cube> group =
-            CubeGroupFinder.FindGroup(
-                _board,
-                tappedCube);
-
-        if (group.Count < 2)
+        if (tappedItem is SpecialItem specialItem)
         {
-            Debug.Log(
-                $"Invalid tap: only {group.Count} cube.");
+            StartCoroutine(
+                ResolveSpecialTap(
+                    specialItem));
 
             return;
         }
-
-        StartCoroutine(
-            ResolveCubeBlast(
-                tappedCube,
-                group));
     }
 
     private IEnumerator ResolveCubeBlast(
@@ -298,6 +317,30 @@ public class LevelController : MonoBehaviour
 
         Debug.Log(
             $"Blasted {group.Count} cubes. " +
+            $"Remaining moves: {_remainingMoves}");
+
+        _isResolving = false;
+    }
+
+    private IEnumerator ResolveSpecialTap(
+    SpecialItem specialItem)
+    {
+        _isResolving = true;
+
+        // Sadece kullanýcýnýn ilk týklamasý move harcar.
+        // Zincirleme tetiklenen special itemlar harcamaz.
+        _remainingMoves--;
+
+        yield return
+            _specialExplosionController.Resolve(
+                specialItem);
+
+        yield return ResolveGravityAndRefill();
+
+        UpdateCubeHints();
+
+        Debug.Log(
+            $"Special item resolution finished. " +
             $"Remaining moves: {_remainingMoves}");
 
         _isResolving = false;

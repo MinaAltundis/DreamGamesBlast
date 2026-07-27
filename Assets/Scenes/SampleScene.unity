@@ -222,6 +222,7 @@ GameObject:
   - component: {fileID: 846365093}
   - component: {fileID: 846365092}
   - component: {fileID: 846365095}
+  - component: {fileID: 846365096}
   m_Layer: 0
   m_Name: LevelController
   m_TagString: Untagged
@@ -292,6 +293,25 @@ MonoBehaviour:
   vaseDamaged: {fileID: -1432975368721100300, guid: 5c81cca35dc6f79438daa1670cfe152b, type: 3}
   chaliceBoxBackground: {fileID: 7642983982991545956, guid: 7f75da240feb9c04085e48cdc036468e, type: 3}
   chaliceBoxDoors: {fileID: -7424629744233440696, guid: 2e56e0317e1d55f4eb00495f0ff5c372, type: 3}
+--- !u!114 &846365096
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 846365091}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9595c36e44c3b4d40be38d54475753d5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SpecialExplosionController
+  horizontalLeftPart: {fileID: 8611318781296695245, guid: d3a7050016e425146bd8636a5817ea84, type: 3}
+  horizontalRightPart: {fileID: -4731576832940087401, guid: 15ab1ae6af73e204b86dcb3d4d4871c0, type: 3}
+  verticalTopPart: {fileID: 51141016974189086, guid: 4d2d962c54760cf419ee4a64295cdbc1, type: 3}
+  verticalBottomPart: {fileID: -4697989437084310921, guid: fc8546548cc9af44597f5fb45c7bcd60, type: 3}
+  rocketStepDuration: 0.06
+  tntPulseDuration: 0.18
+  itemDestroyDuration: 0.12
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
