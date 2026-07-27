@@ -26,6 +26,15 @@ public class LevelController : MonoBehaviour
 
     public int RemainingMoves => _remainingMoves;
 
+    private static readonly Vector2Int[]
+        OrthogonalDirections =
+    {
+        new Vector2Int(1, 0),
+        new Vector2Int(-1, 0),
+        new Vector2Int(0, 1),
+        new Vector2Int(0, -1)
+    };
+
     private class FallAnimation
     {
         public GridItem Item;
@@ -92,6 +101,102 @@ public class LevelController : MonoBehaviour
         }
 
         HandlePointerDown(screenPosition);
+    }
+
+    private void DamageAdjacentObstacles(
+    List<Cube> blastedGroup)
+    {
+        // Her obstacle için ona komþu olan farklý
+        // blasted cube'larý topluyoruz.
+        Dictionary<Obstacle, HashSet<Cube>>
+            adjacentCubesByObstacle =
+                new Dictionary<
+                    Obstacle,
+                    HashSet<Cube>>();
+
+        foreach (Cube cube in blastedGroup)
+        {
+            if (cube == null)
+            {
+                continue;
+            }
+
+            foreach (Vector2Int direction
+                     in OrthogonalDirections)
+            {
+                int neighbourRow =
+                    cube.Row + direction.y;
+
+                int neighbourColumn =
+                    cube.Column + direction.x;
+
+                GridItem neighbour =
+                    _board.GetItem(
+                        neighbourRow,
+                        neighbourColumn);
+
+                if (!(neighbour is
+                      Obstacle obstacle))
+                {
+                    continue;
+                }
+
+                if (!adjacentCubesByObstacle
+                        .TryGetValue(
+                            obstacle,
+                            out HashSet<Cube>
+                                adjacentCubes))
+                {
+                    adjacentCubes =
+                        new HashSet<Cube>();
+
+                    adjacentCubesByObstacle.Add(
+                        obstacle,
+                        adjacentCubes);
+                }
+
+                // Ayný cube, ayný 2x2 Chalice Box'a
+                // iki kez sayýlmasýn.
+                adjacentCubes.Add(cube);
+            }
+        }
+
+        foreach (
+            KeyValuePair<
+                Obstacle,
+                HashSet<Cube>> entry
+            in adjacentCubesByObstacle)
+        {
+            Obstacle obstacle = entry.Key;
+
+            if (obstacle == null)
+            {
+                continue;
+            }
+
+            bool cleared =
+                obstacle.ApplyDamage(
+                    ObstacleDamageSource
+                        .AdjacentCubeBlast,
+                    entry.Value.Count);
+
+            if (cleared)
+            {
+                RemoveObstacle(obstacle);
+            }
+        }
+    }
+
+    private void RemoveObstacle(
+        Obstacle obstacle)
+    {
+        if (obstacle == null)
+        {
+            return;
+        }
+
+        _board.ClearAllReferences(obstacle);
+        Destroy(obstacle.gameObject);
     }
 
     private bool TryGetPointerDown(
@@ -267,6 +372,8 @@ public class LevelController : MonoBehaviour
 
             yield return null;
         }
+
+        DamageAdjacentObstacles(group);
 
         foreach (Cube cube in group)
         {

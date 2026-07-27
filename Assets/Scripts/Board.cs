@@ -63,6 +63,30 @@ public class Board
         }
     }
 
+    public void ClearAllReferences(
+    GridItem item)
+    {
+        if (item == null)
+        {
+            return;
+        }
+
+        for (int row = 0;
+             row < Height;
+             row++)
+        {
+            for (int column = 0;
+                 column < Width;
+                 column++)
+            {
+                if (_items[row, column] == item)
+                {
+                    _items[row, column] = null;
+                }
+            }
+        }
+    }
+
     public Vector2 CellToWorld(int row, int column)
     {
         float x =

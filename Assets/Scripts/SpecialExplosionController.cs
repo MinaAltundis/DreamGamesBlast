@@ -2,8 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-// Rocket ve TNT patlamalarýnýn animasyonunu ve zincirleme
-// special-item tetiklenmesini yönetir.
+// Rocket ve TNT patlamalarýný, zincirleme special item tetiklenmelerini
+// ve special item kaynaklý obstacle hasarlarýný yönetir.
 public class SpecialExplosionController : MonoBehaviour
 {
     [Header("Rocket Part Sprites")]
@@ -19,8 +19,8 @@ public class SpecialExplosionController : MonoBehaviour
 
     private Board _board;
 
-    // Ayný cube'un iki farklý patlama tarafýndan iki kez
-    // silinmesini engeller.
+    // Ayný item'ýn birden fazla patlama hücresi tarafýndan
+    // tekrar tekrar silinmesini engeller.
     private readonly HashSet<GridItem> _removingItems =
         new HashSet<GridItem>();
 
@@ -77,7 +77,7 @@ public class SpecialExplosionController : MonoBehaviour
             }
         }
 
-        // Son vurulan cube animasyonlarýnýn bitmesini bekle.
+        // Cube küçülme animasyonlarýnýn tamamlanmasý için bekler.
         if (itemDestroyDuration > 0f)
         {
             yield return new WaitForSeconds(
@@ -96,8 +96,8 @@ public class SpecialExplosionController : MonoBehaviour
             return;
         }
 
-        // Board açýsýndan hücre hemen boþalýr; fakat nesne kendi
-        // patlama sýrasý gelene kadar ekranda kalýr.
+        // Board hücresi hemen boþaltýlýr.
+        // Görsel nesne kendi patlama sýrasýna kadar sahnede kalýr.
         _board.ClearItem(
             specialItem.Row,
             specialItem.Column,
@@ -113,6 +113,11 @@ public class SpecialExplosionController : MonoBehaviour
     {
         int centerRow = rocket.Row;
         int centerColumn = rocket.Column;
+
+        // Bu Rocket tek bir damage source'tur.
+        // Ayný obstacle'ýn kaç hücresine deðdiðini burada toplarýz.
+        Dictionary<Obstacle, int> obstacleHits =
+            new Dictionary<Obstacle, int>();
 
         SpriteRenderer originalRenderer =
             rocket.GetComponent<SpriteRenderer>();
@@ -268,7 +273,8 @@ public class SpecialExplosionController : MonoBehaviour
                     positiveRow,
                     positiveColumn,
                     pendingSpecials,
-                    triggeredSpecials);
+                    triggeredSpecials,
+                    obstacleHits);
             }
 
             if (negativeInside)
@@ -280,9 +286,13 @@ public class SpecialExplosionController : MonoBehaviour
                     negativeRow,
                     negativeColumn,
                     pendingSpecials,
-                    triggeredSpecials);
+                    triggeredSpecials,
+                    obstacleHits);
             }
         }
+
+        // Rocket'ýn vurduðu obstacle'lara bu damage source'u uygular.
+        ApplyObstacleHits(obstacleHits);
 
         if (positivePart != null)
         {
@@ -305,12 +315,16 @@ public class SpecialExplosionController : MonoBehaviour
         int centerRow = tnt.Row;
         int centerColumn = tnt.Column;
 
+        // Bu TNT tek bir damage source'tur.
+        Dictionary<Obstacle, int> obstacleHits =
+            new Dictionary<Obstacle, int>();
+
         Vector3 originalScale =
             tnt.transform.localScale;
 
         float elapsed = 0f;
 
-        // Küçük bir büyüyüp küçülme animasyonu.
+        // TNT büyüyüp küçülerek patlamaya hazýrlanýr.
         while (elapsed < tntPulseDuration)
         {
             elapsed += Time.deltaTime;
@@ -333,7 +347,8 @@ public class SpecialExplosionController : MonoBehaviour
         tnt.transform.localScale =
             originalScale;
 
-        // Merkezden iki hücre her yöne: toplam 5x5.
+        // Merkezden iki hücre her yöne:
+        // toplam 5x5 patlama alaný.
         for (int row = centerRow - 2;
              row <= centerRow + 2;
              row++)
@@ -353,9 +368,13 @@ public class SpecialExplosionController : MonoBehaviour
                     row,
                     column,
                     pendingSpecials,
-                    triggeredSpecials);
+                    triggeredSpecials,
+                    obstacleHits);
             }
         }
+
+        // TNT'nin vurduðu obstacle'lara tek damage source olarak uygular.
+        ApplyObstacleHits(obstacleHits);
 
         yield return ScaleToZero(
             tnt.transform,
@@ -368,7 +387,8 @@ public class SpecialExplosionController : MonoBehaviour
         int row,
         int column,
         Queue<SpecialItem> pendingSpecials,
-        HashSet<SpecialItem> triggeredSpecials)
+        HashSet<SpecialItem> triggeredSpecials,
+        Dictionary<Obstacle, int> obstacleHits)
     {
         GridItem item =
             _board.GetItem(row, column);
@@ -378,8 +398,8 @@ public class SpecialExplosionController : MonoBehaviour
             return;
         }
 
-        // Special item baþka special item tarafýndan vurulursa
-        // kendi patlamasýný zincirleme olarak gerçekleþtirir.
+        // Bir special item baþka bir special item tarafýndan vurulursa
+        // zincirleme patlama kuyruðuna eklenir.
         if (item is SpecialItem specialItem)
         {
             EnqueueSpecial(
@@ -398,12 +418,51 @@ public class SpecialExplosionController : MonoBehaviour
 
         if (item is Obstacle obstacle)
         {
-            // Bir sonraki aþamada burada gerçek Stone, Vase ve
-            // Chalice Box damage sistemi çaðrýlacak.
-            Debug.Log(
-                $"Special explosion hit " +
-                $"{obstacle.GetType().Name} at " +
-                $"({row}, {column}).");
+            if (!obstacleHits.TryGetValue(
+                    obstacle,
+                    out int affectedCells))
+            {
+                affectedCells = 0;
+            }
+
+            // Chalice Box ayný nesne olarak dört Board hücresinde
+            // tutulur. Patlamanýn deðdiði her hücre ayrý sayýlýr.
+            obstacleHits[obstacle] =
+                affectedCells + 1;
+        }
+    }
+
+    private void ApplyObstacleHits(
+        Dictionary<Obstacle, int> obstacleHits)
+    {
+        foreach (
+            KeyValuePair<Obstacle, int> entry
+            in obstacleHits)
+        {
+            Obstacle obstacle =
+                entry.Key;
+
+            if (obstacle == null)
+            {
+                continue;
+            }
+
+            bool cleared =
+                obstacle.ApplyDamage(
+                    ObstacleDamageSource
+                        .SpecialItemExplosion,
+                    entry.Value);
+
+            if (!cleared)
+            {
+                continue;
+            }
+
+            // Chalice Box dört hücreyi temsil ettiði için
+            // Board üzerindeki bütün referanslarý temizlenir.
+            _board.ClearAllReferences(obstacle);
+
+            Destroy(obstacle.gameObject);
         }
     }
 
@@ -495,6 +554,12 @@ public class SpecialExplosionController : MonoBehaviour
 
             yield return null;
         }
+
+        if (target != null)
+        {
+            target.localScale =
+                Vector3.zero;
+        }
     }
 
     private IEnumerator MoveRocketParts(
@@ -550,6 +615,20 @@ public class SpecialExplosionController : MonoBehaviour
 
             yield return null;
         }
+
+        if (positiveActive &&
+            positivePart != null)
+        {
+            positivePart.transform.position =
+                positiveTarget;
+        }
+
+        if (negativeActive &&
+            negativePart != null)
+        {
+            negativePart.transform.position =
+                negativeTarget;
+        }
     }
 
     private GameObject CreateRocketPart(
@@ -590,7 +669,8 @@ public class SpecialExplosionController : MonoBehaviour
         Transform target,
         Sprite sprite)
     {
-        if (sprite == null)
+        if (sprite == null ||
+            _board == null)
         {
             return;
         }

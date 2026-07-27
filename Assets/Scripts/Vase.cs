@@ -8,7 +8,9 @@ public class Vase : Obstacle
 
     public override bool CanFall => true;
 
-    public void Init(Sprite healthySprite, Sprite damagedSprite)
+    public void Init(
+        Sprite healthySprite,
+        Sprite damagedSprite)
     {
         HitPoints = 2;
         _damagedSprite = damagedSprite;
@@ -16,21 +18,39 @@ public class Vase : Obstacle
         SetSprite(healthySprite);
     }
 
-    // We will call this from the blast system later.
-    public bool TakeOneDamage()
+    public override bool ApplyDamage(
+        ObstacleDamageSource source,
+        int affectedCount)
     {
-        if (HitPoints <= 0)
+        if (IsCleared || affectedCount <= 0)
         {
-            return true;
+            return IsCleared;
         }
 
+        // Bir damage source, kaç hücre/küp ile vurursa vursun
+        // Vase'e en fazla bir hasar verir.
         HitPoints--;
 
-        if (HitPoints == 1 && _damagedSprite != null)
+        if (HitPoints == 1)
         {
-            SetSprite(_damagedSprite);
+            if (_damagedSprite != null)
+            {
+                SetSprite(_damagedSprite);
+            }
+
+            Debug.Log(
+                $"Vase damaged at ({Row}, {Column}).");
         }
 
-        return HitPoints == 0;
+        if (HitPoints <= 0)
+        {
+            HitPoints = 0;
+            IsCleared = true;
+
+            Debug.Log(
+                $"Vase cleared at ({Row}, {Column}).");
+        }
+
+        return IsCleared;
     }
 }
