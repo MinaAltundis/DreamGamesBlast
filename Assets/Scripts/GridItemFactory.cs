@@ -2,11 +2,23 @@ using UnityEngine;
 
 public class GridItemFactory : MonoBehaviour
 {
-    [Header("Cubes")]
+    [Header("Cubes - Default")]
     [SerializeField] private Sprite redCube;
     [SerializeField] private Sprite greenCube;
     [SerializeField] private Sprite blueCube;
     [SerializeField] private Sprite yellowCube;
+
+    [Header("Cubes - Rocket Hint")]
+    [SerializeField] private Sprite redRocketHint;
+    [SerializeField] private Sprite greenRocketHint;
+    [SerializeField] private Sprite blueRocketHint;
+    [SerializeField] private Sprite yellowRocketHint;
+
+    [Header("Cubes - TNT Hint")]
+    [SerializeField] private Sprite redTntHint;
+    [SerializeField] private Sprite greenTntHint;
+    [SerializeField] private Sprite blueTntHint;
+    [SerializeField] private Sprite yellowTntHint;
 
     [Header("Special Items")]
     [SerializeField] private Sprite horizontalRocket;
@@ -20,7 +32,7 @@ public class GridItemFactory : MonoBehaviour
     [SerializeField] private Sprite chaliceBoxBackground;
     [SerializeField] private Sprite chaliceBoxDoors;
 
-    public void Create(
+    public GridItem Create(
         string code,
         int row,
         int column,
@@ -30,115 +42,152 @@ public class GridItemFactory : MonoBehaviour
         switch (code)
         {
             case "r":
-                CreateCube(CubeColor.Red, row, column, board, parent);
-                break;
+                return SpawnCube(
+                    CubeColor.Red,
+                    row,
+                    column,
+                    board,
+                    parent);
 
             case "g":
-                CreateCube(CubeColor.Green, row, column, board, parent);
-                break;
+                return SpawnCube(
+                    CubeColor.Green,
+                    row,
+                    column,
+                    board,
+                    parent);
 
             case "b":
-                CreateCube(CubeColor.Blue, row, column, board, parent);
-                break;
+                return SpawnCube(
+                    CubeColor.Blue,
+                    row,
+                    column,
+                    board,
+                    parent);
 
             case "y":
-                CreateCube(CubeColor.Yellow, row, column, board, parent);
-                break;
+                return SpawnCube(
+                    CubeColor.Yellow,
+                    row,
+                    column,
+                    board,
+                    parent);
 
             case "rand":
-                CubeColor randomColor =
-                    (CubeColor)Random.Range(0, 4);
-
-                CreateCube(
-                    randomColor,
+                return SpawnRandomCube(
                     row,
                     column,
                     board,
                     parent);
-                break;
 
             case "hro":
-                CreateRocket(
+                return SpawnRocket(
                     RocketDirection.Horizontal,
-                    horizontalRocket,
                     row,
                     column,
                     board,
                     parent);
-                break;
 
             case "vro":
-                CreateRocket(
+                return SpawnRocket(
                     RocketDirection.Vertical,
-                    verticalRocket,
                     row,
                     column,
                     board,
                     parent);
-                break;
 
             case "t":
-                CreateTnt(row, column, board, parent);
-                break;
+                return SpawnTnt(
+                    row,
+                    column,
+                    board,
+                    parent);
 
             case "s":
-                CreateStone(row, column, board, parent);
-                break;
+                return SpawnStone(
+                    row,
+                    column,
+                    board,
+                    parent);
 
             case "v":
-                CreateVase(row, column, board, parent);
-                break;
+                return SpawnVase(
+                    row,
+                    column,
+                    board,
+                    parent);
 
             case "cbBL":
-                CreateChaliceBox(row, column, board, parent);
-                break;
+                return SpawnChaliceBox(
+                    row,
+                    column,
+                    board,
+                    parent);
 
             case "cbBR":
             case "cbTL":
             case "cbTR":
-                // Normally these cells are already occupied by the
-                // ChaliceBox created from cbBL.
                 Debug.LogError(
                     $"Chalice Box part at ({row}, {column}) " +
                     "was found without a valid cbBL anchor.");
-                break;
+                return null;
 
             default:
                 Debug.LogWarning(
                     $"Unknown grid code '{code}' at " +
                     $"({row}, {column}).");
-                break;
+                return null;
         }
     }
 
-    private void CreateCube(
-        CubeColor color,
+    public Cube SpawnRandomCube(
         int row,
         int column,
         Board board,
         Transform parent)
     {
-        Cube cube = CreateAt<Cube>(
-            $"Cube_{row}_{column}",
+        CubeColor randomColor =
+            (CubeColor)Random.Range(0, 4);
+
+        return SpawnCube(
+            randomColor,
             row,
             column,
-            board.CellToWorld(row, column),
+            board,
             parent);
-
-        cube.Init(color, SpriteFor(color));
-        cube.FitToCellSize(board.CellSize);
-
-        board.SetItem(row, column, cube);
     }
 
-    private void CreateRocket(
-        RocketDirection direction,
-        Sprite sprite,
+    public Rocket SpawnRandomRocket(
         int row,
         int column,
         Board board,
         Transform parent)
     {
+        RocketDirection direction =
+            Random.value < 0.5f
+                ? RocketDirection.Horizontal
+                : RocketDirection.Vertical;
+
+        return SpawnRocket(
+            direction,
+            row,
+            column,
+            board,
+            parent);
+    }
+
+    public Rocket SpawnRocket(
+        RocketDirection direction,
+        int row,
+        int column,
+        Board board,
+        Transform parent)
+    {
+        Sprite sprite =
+            direction == RocketDirection.Horizontal
+                ? horizontalRocket
+                : verticalRocket;
+
         Rocket rocket = CreateAt<Rocket>(
             $"{direction}Rocket_{row}_{column}",
             row,
@@ -150,9 +199,11 @@ public class GridItemFactory : MonoBehaviour
         rocket.FitToCellSize(board.CellSize);
 
         board.SetItem(row, column, rocket);
+
+        return rocket;
     }
 
-    private void CreateTnt(
+    public Tnt SpawnTnt(
         int row,
         int column,
         Board board,
@@ -169,9 +220,38 @@ public class GridItemFactory : MonoBehaviour
         item.FitToCellSize(board.CellSize);
 
         board.SetItem(row, column, item);
+
+        return item;
     }
 
-    private void CreateStone(
+    private Cube SpawnCube(
+        CubeColor color,
+        int row,
+        int column,
+        Board board,
+        Transform parent)
+    {
+        Cube cube = CreateAt<Cube>(
+            $"Cube_{row}_{column}",
+            row,
+            column,
+            board.CellToWorld(row, column),
+            parent);
+
+        cube.Init(
+            color,
+            DefaultSpriteFor(color),
+            RocketHintSpriteFor(color),
+            TntHintSpriteFor(color));
+
+        cube.FitToCellSize(board.CellSize);
+
+        board.SetItem(row, column, cube);
+
+        return cube;
+    }
+
+    private Stone SpawnStone(
         int row,
         int column,
         Board board,
@@ -188,9 +268,11 @@ public class GridItemFactory : MonoBehaviour
         item.FitToCellSize(board.CellSize);
 
         board.SetItem(row, column, item);
+
+        return item;
     }
 
-    private void CreateVase(
+    private Vase SpawnVase(
         int row,
         int column,
         Board board,
@@ -207,31 +289,35 @@ public class GridItemFactory : MonoBehaviour
         item.FitToCellSize(board.CellSize);
 
         board.SetItem(row, column, item);
+
+        return item;
     }
 
-    private void CreateChaliceBox(
+    private ChaliceBox SpawnChaliceBox(
         int row,
         int column,
         Board board,
         Transform parent)
     {
-        // cbBL is the bottom-left cell of a 2x2 area.
         if (!board.IsInside(row + 1, column + 1))
         {
             Debug.LogError(
                 $"Chalice Box at ({row}, {column}) " +
                 "does not fit inside the board.");
 
-            return;
+            return null;
         }
 
         Vector2 bottomLeft =
             board.CellToWorld(row, column);
 
         Vector2 topRight =
-            board.CellToWorld(row + 1, column + 1);
+            board.CellToWorld(
+                row + 1,
+                column + 1);
 
-        Vector2 center = (bottomLeft + topRight) * 0.5f;
+        Vector2 center =
+            (bottomLeft + topRight) * 0.5f;
 
         ChaliceBox box = CreateAt<ChaliceBox>(
             $"ChaliceBox_{row}_{column}",
@@ -240,18 +326,21 @@ public class GridItemFactory : MonoBehaviour
             center,
             parent);
 
-        box.Init(chaliceBoxBackground, chaliceBoxDoors);
+        box.Init(
+            chaliceBoxBackground,
+            chaliceBoxDoors);
 
         box.FitToSize(
             board.CellSize * 2f,
             board.CellSize * 2f,
             0.96f);
 
-        // All four cells refer to the same logical object.
         board.SetItem(row, column, box);
         board.SetItem(row, column + 1, box);
         board.SetItem(row + 1, column, box);
         board.SetItem(row + 1, column + 1, box);
+
+        return box;
     }
 
     private T CreateAt<T>(
@@ -262,10 +351,13 @@ public class GridItemFactory : MonoBehaviour
         Transform parent)
         where T : GridItem
     {
-        GameObject itemObject = new GameObject(objectName);
+        GameObject itemObject =
+            new GameObject(objectName);
+
         itemObject.transform.SetParent(parent);
 
-        T item = itemObject.AddComponent<T>();
+        T item =
+            itemObject.AddComponent<T>();
 
         item.SetGridPosition(row, column);
         item.transform.position = worldPosition;
@@ -273,7 +365,7 @@ public class GridItemFactory : MonoBehaviour
         return item;
     }
 
-    private Sprite SpriteFor(CubeColor color)
+    private Sprite DefaultSpriteFor(CubeColor color)
     {
         switch (color)
         {
@@ -291,6 +383,48 @@ public class GridItemFactory : MonoBehaviour
 
             default:
                 return redCube;
+        }
+    }
+
+    private Sprite RocketHintSpriteFor(CubeColor color)
+    {
+        switch (color)
+        {
+            case CubeColor.Red:
+                return redRocketHint;
+
+            case CubeColor.Green:
+                return greenRocketHint;
+
+            case CubeColor.Blue:
+                return blueRocketHint;
+
+            case CubeColor.Yellow:
+                return yellowRocketHint;
+
+            default:
+                return redRocketHint;
+        }
+    }
+
+    private Sprite TntHintSpriteFor(CubeColor color)
+    {
+        switch (color)
+        {
+            case CubeColor.Red:
+                return redTntHint;
+
+            case CubeColor.Green:
+                return greenTntHint;
+
+            case CubeColor.Blue:
+                return blueTntHint;
+
+            case CubeColor.Yellow:
+                return yellowTntHint;
+
+            default:
+                return redTntHint;
         }
     }
 }

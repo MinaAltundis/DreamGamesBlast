@@ -242,6 +242,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LevelController
   cellSize: 1
+  blastDuration: 0.18
+  specialCreationDuration: 0.14
+  fallDuration: 0.3
 --- !u!4 &846365093
 Transform:
   m_ObjectHideFlags: 0
@@ -273,6 +276,14 @@ MonoBehaviour:
   greenCube: {fileID: -6099873399732076034, guid: de154ac53ef770c45a71129502d3b296, type: 3}
   blueCube: {fileID: -2615874204119335, guid: 69a3614c1d8cde141b3ac135c2b8e3e6, type: 3}
   yellowCube: {fileID: -8425141836431729757, guid: 8825d89db48c31c44905ee5678f17a5b, type: 3}
+  redRocketHint: {fileID: -4162601588504768772, guid: b89c44deff316084dbf573ed76f363ab, type: 3}
+  greenRocketHint: {fileID: -8149426069742796037, guid: 442c461d5c6929c498786501345abfea, type: 3}
+  blueRocketHint: {fileID: 8853254876290271475, guid: 749261b4497237744bb1b2622d09983b, type: 3}
+  yellowRocketHint: {fileID: 6090080599973395561, guid: b17aaae26c4b54b47be77f97c9378d52, type: 3}
+  redTntHint: {fileID: 2184194870819415236, guid: a884985dcfe17a948a2864c6b32f20a6, type: 3}
+  greenTntHint: {fileID: -3311934926304285867, guid: d73a7146345f9804e80a53a6159548c9, type: 3}
+  blueTntHint: {fileID: -6398920596853824910, guid: 0877423939c135d409238be2518f2b80, type: 3}
+  yellowTntHint: {fileID: -2969105743741883941, guid: 882181881998fc44e9af7f8ce3f7a001, type: 3}
   horizontalRocket: {fileID: 1184650260280522132, guid: d148a8b98fbd34640a661e681c31b58b, type: 3}
   verticalRocket: {fileID: 6449952862585347896, guid: 655bd27cfefdfd74b91e9e544b1b4ca7, type: 3}
   tnt: {fileID: -8136218936520485124, guid: e34cec55e001990418f2f3704c92f02e, type: 3}

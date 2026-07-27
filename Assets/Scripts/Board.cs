@@ -56,8 +56,6 @@ public class Board
             return;
         }
 
-        // expectedItem verilmiþse, yanlýþlýkla baþka bir item'ý
-        // silmemek için hücrenin hâlâ onu tuttuðunu doðrularýz.
         if (expectedItem == null ||
             _items[row, column] == expectedItem)
         {
@@ -76,15 +74,16 @@ public class Board
         return new Vector2(x, y);
     }
 
-    // Ekrandaki týklamanýn hangi grid hücresine denk
-    // geldiðini hesaplamak için kullanýlýr.
     public bool TryWorldToCell(
         Vector2 worldPosition,
         out int row,
         out int column)
     {
-        float leftEdge = -(Width * CellSize) / 2f;
-        float bottomEdge = -(Height * CellSize) / 2f;
+        float leftEdge =
+            -(Width * CellSize) / 2f;
+
+        float bottomEdge =
+            -(Height * CellSize) / 2f;
 
         column = Mathf.FloorToInt(
             (worldPosition.x - leftEdge) / CellSize);
