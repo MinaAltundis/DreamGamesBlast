@@ -222,7 +222,6 @@ GameObject:
   - component: {fileID: 846365093}
   - component: {fileID: 846365092}
   - component: {fileID: 846365095}
-  - component: {fileID: 846365094}
   m_Layer: 0
   m_Name: LevelController
   m_TagString: Untagged
@@ -258,19 +257,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &846365094
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 846365091}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 968c4181f8bec5a49aaf0fdd46dd9eed, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::LevelController
-  cellSize: 1
 --- !u!114 &846365095
 MonoBehaviour:
   m_ObjectHideFlags: 0
