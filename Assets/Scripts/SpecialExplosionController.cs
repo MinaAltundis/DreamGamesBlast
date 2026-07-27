@@ -4,7 +4,7 @@ using UnityEngine;
 
 // Rocket ve TNT patlamalarýný, zincirleme special item tetiklenmelerini
 // ve special item kaynaklý obstacle hasarlarýný yönetir.
-public class SpecialExplosionController : MonoBehaviour
+public partial class SpecialExplosionController : MonoBehaviour
 {
     [Header("Rocket Part Sprites")]
     [SerializeField] private Sprite horizontalLeftPart;

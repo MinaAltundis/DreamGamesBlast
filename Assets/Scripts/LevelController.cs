@@ -281,9 +281,15 @@ public class LevelController : MonoBehaviour
 
         if (tappedItem is SpecialItem specialItem)
         {
+            List<SpecialItem> specialGroup =
+                SpecialItemGroupFinder.FindGroup(
+                    _board,
+                    specialItem);
+
             StartCoroutine(
                 ResolveSpecialTap(
-                    specialItem));
+                    specialItem,
+                    specialGroup));
 
             return;
         }
@@ -430,24 +436,36 @@ public class LevelController : MonoBehaviour
     }
 
     private IEnumerator ResolveSpecialTap(
-    SpecialItem specialItem)
+    SpecialItem specialItem,
+    List<SpecialItem> specialGroup)
     {
         _isResolving = true;
 
-        // Sadece kullanýcýnýn ilk týklamasý move harcar.
-        // Zincirleme tetiklenen special itemlar harcamaz.
+        // Normal patlama, combo ve zincirleme patlama
+        // toplamda yalnýzca bir move harcar.
         _remainingMoves--;
 
-        yield return
-            _specialExplosionController.Resolve(
-                specialItem);
+        if (specialGroup != null &&
+            specialGroup.Count >= 2)
+        {
+            yield return
+                _specialExplosionController.ResolveCombo(
+                    specialItem,
+                    specialGroup);
+        }
+        else
+        {
+            yield return
+                _specialExplosionController.Resolve(
+                    specialItem);
+        }
 
         yield return ResolveGravityAndRefill();
 
         UpdateCubeHints();
 
         Debug.Log(
-            $"Special item resolution finished. " +
+            $"Special resolution finished. " +
             $"Remaining moves: {_remainingMoves}");
 
         _isResolving = false;
