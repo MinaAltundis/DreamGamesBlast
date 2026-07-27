@@ -221,6 +221,8 @@ GameObject:
   m_Component:
   - component: {fileID: 846365093}
   - component: {fileID: 846365092}
+  - component: {fileID: 846365095}
+  - component: {fileID: 846365094}
   m_Layer: 0
   m_Name: LevelController
   m_TagString: Untagged
@@ -241,10 +243,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LevelController
   cellSize: 1
-  redCube: {fileID: 8166710274925509176, guid: 6853d04cd4a75eb4499203f2df08dbc4, type: 3}
-  greenCube: {fileID: -6099873399732076034, guid: de154ac53ef770c45a71129502d3b296, type: 3}
-  blueCube: {fileID: -2615874204119335, guid: 69a3614c1d8cde141b3ac135c2b8e3e6, type: 3}
-  yellowCube: {fileID: -8425141836431729757, guid: 8825d89db48c31c44905ee5678f17a5b, type: 3}
 --- !u!4 &846365093
 Transform:
   m_ObjectHideFlags: 0
@@ -260,6 +258,43 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &846365094
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 846365091}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 968c4181f8bec5a49aaf0fdd46dd9eed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LevelController
+  cellSize: 1
+--- !u!114 &846365095
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 846365091}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2c006caf6d76df14593efd2a123c1651, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GridItemFactory
+  redCube: {fileID: 8166710274925509176, guid: 6853d04cd4a75eb4499203f2df08dbc4, type: 3}
+  greenCube: {fileID: -6099873399732076034, guid: de154ac53ef770c45a71129502d3b296, type: 3}
+  blueCube: {fileID: -2615874204119335, guid: 69a3614c1d8cde141b3ac135c2b8e3e6, type: 3}
+  yellowCube: {fileID: -8425141836431729757, guid: 8825d89db48c31c44905ee5678f17a5b, type: 3}
+  horizontalRocket: {fileID: 1184650260280522132, guid: d148a8b98fbd34640a661e681c31b58b, type: 3}
+  verticalRocket: {fileID: 6449952862585347896, guid: 655bd27cfefdfd74b91e9e544b1b4ca7, type: 3}
+  tnt: {fileID: -8136218936520485124, guid: e34cec55e001990418f2f3704c92f02e, type: 3}
+  stone: {fileID: 5725184139431673129, guid: cf4e56c5ca4776b4da6b09a90cfa2eb3, type: 3}
+  vaseHealthy: {fileID: -4678962038349899921, guid: 73c1f6d0100dfd64b847ff74be4968d9, type: 3}
+  vaseDamaged: {fileID: -1432975368721100300, guid: 5c81cca35dc6f79438daa1670cfe152b, type: 3}
+  chaliceBoxBackground: {fileID: 7642983982991545956, guid: 7f75da240feb9c04085e48cdc036468e, type: 3}
+  chaliceBoxDoors: {fileID: -7424629744233440696, guid: 2e56e0317e1d55f4eb00495f0ff5c372, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
