@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 [RequireComponent(
     typeof(GridItemFactory),
@@ -14,6 +15,12 @@ public class LevelController : MonoBehaviour
     [SerializeField] private float blastDuration = 0.18f;
     [SerializeField] private float specialCreationDuration = 0.14f;
     [SerializeField] private float fallDuration = 0.30f;
+
+    [Header("UI")]
+    [SerializeField]
+    private LevelUIController levelUI;
+
+    private bool _isLevelEnded;
 
     private Board _board;
     private GridItemFactory _itemFactory;
@@ -68,6 +75,19 @@ public class LevelController : MonoBehaviour
 
         _remainingMoves = data.MoveCount;
 
+        if (levelUI == null)
+        {
+            levelUI =
+                FindFirstObjectByType<
+                    LevelUIController>();
+        }
+
+        if (levelUI != null)
+        {
+            levelUI.SetMoves(
+                _remainingMoves);
+        }
+
         _board = new Board(
             data.Width,
             data.Height,
@@ -88,6 +108,7 @@ public class LevelController : MonoBehaviour
     private void Update()
     {
         if (_isResolving ||
+            _isLevelEnded ||
             _board == null ||
             _remainingMoves <= 0)
         {
@@ -101,6 +122,86 @@ public class LevelController : MonoBehaviour
         }
 
         HandlePointerDown(screenPosition);
+    }
+
+    private IEnumerator CompleteTurn(
+    string resultMessage)
+    {
+        yield return ResolveGravityAndRefill();
+
+        UpdateCubeHints();
+
+        if (levelUI != null)
+        {
+            levelUI.SetMoves(
+                _remainingMoves);
+        }
+
+        Debug.Log(resultMessage);
+
+        // Son hamlede son obstacle temizlendiyse
+        // fail yerine win önceliklidir.
+        if (!_board.HasAnyObstacle())
+        {
+            yield return HandleLevelWin();
+            yield break;
+        }
+
+        if (_remainingMoves <= 0)
+        {
+            HandleLevelFail();
+            yield break;
+        }
+
+        _isResolving = false;
+    }
+
+    private IEnumerator HandleLevelWin()
+    {
+        _isLevelEnded = true;
+
+        int completedLevel =
+            ProgressService.GetCurrentLevel();
+
+        ProgressService.AdvanceToNextLevel();
+
+        Debug.Log(
+            $"Level {completedLevel} completed. " +
+            $"Next level: " +
+            $"{ProgressService.GetCurrentLevel()}");
+
+        if (levelUI != null)
+        {
+            yield return
+                levelUI.PlayWinCelebration();
+        }
+        else
+        {
+            yield return new WaitForSeconds(
+                1.5f);
+        }
+
+        SceneManager.LoadScene(
+            SceneNames.Main);
+    }
+
+    private void HandleLevelFail()
+    {
+        _isLevelEnded = true;
+        _isResolving = false;
+
+        Debug.Log(
+            "Level failed: no moves remaining.");
+
+        if (levelUI != null)
+        {
+            levelUI.ShowFail();
+        }
+        else
+        {
+            Debug.LogError(
+                "LevelUIController was not found.");
+        }
     }
 
     private void DamageAdjacentObstacles(
@@ -424,15 +525,9 @@ public class LevelController : MonoBehaviour
                 createdSpecialItem);
         }
 
-        yield return ResolveGravityAndRefill();
-
-        UpdateCubeHints();
-
-        Debug.Log(
+        yield return CompleteTurn(
             $"Blasted {group.Count} cubes. " +
             $"Remaining moves: {_remainingMoves}");
-
-        _isResolving = false;
     }
 
     private IEnumerator ResolveSpecialTap(
@@ -460,15 +555,9 @@ public class LevelController : MonoBehaviour
                     specialItem);
         }
 
-        yield return ResolveGravityAndRefill();
-
-        UpdateCubeHints();
-
-        Debug.Log(
+        yield return CompleteTurn(
             $"Special resolution finished. " +
             $"Remaining moves: {_remainingMoves}");
-
-        _isResolving = false;
     }
 
     private IEnumerator AnimateSpecialCreation(

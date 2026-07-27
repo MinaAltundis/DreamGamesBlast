@@ -63,6 +63,22 @@ public class Board
         }
     }
 
+    public bool HasAnyObstacle()
+    {
+        for (int row = 0; row < Height; row++)
+        {
+            for (int column = 0; column < Width; column++)
+            {
+                if (_items[row, column] is Obstacle)
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     public void ClearAllReferences(
     GridItem item)
     {
